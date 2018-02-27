@@ -334,3 +334,109 @@ SELECT name, ROUND(price * 1.06) AS "With tax" FROM products;
 SELECT name, ROUND(price * 1.06, 2) AS "With tax" FROM products; -- rounded to 2 decimal places
 ```
 
+### Differences Between Databases
+
+* Dates, how written
+* Functions for dates
+* Formatting dates
+
+**Creating Up-to-the-Minute Reports**  
+
+One of the powerful features in SQL is writing queries based on today's date and time. We'll use a function to get today's date.
+
+#### SQLite
+
+To get the **current date** use: `DATE("now")`
+
+To get the **current time** use: `TIME("now")`
+
+To get the **current date** time: `DATETIME("NOW")`
+
+#### MS SQL
+
+To get the current date use: `CONVERT(date, GETDATE())`
+
+To get the current time use: `CONVERT(time, GETDATE())`
+
+To get the current date time: `GETDATE()`
+
+#### MySQL
+
+To get the current date use: `CURDATE()`
+
+To get the current time use: `CURTIME()`
+
+To get the current date time: `NOW()`
+
+#### Oracle and PostgreSQL
+
+To get the current date use: `CURRENT_DATE`
+
+To get the current time use: `CURRENT_TIME`
+
+To get the current date time: `CURRENT_TIMESTAMP`
+
+**Example:** 
+
+ In an ecommerce database there's an `orders` table with the columns `id`, `product_id`, `user_id`, `address_id`, `ordered_on`, `status` and `cost`.
+
+Count the total number of orders that have the `status` of `shipped` today. Alias it to `shipped_today`.
+
+```sql
+SELECT COUNT(*) AS shipped_today FROM orders 
+									WHERE status = "shipped" 
+									AND ordered_on = DATE("now");
+```
+
+### Calculating dates
+
+Calculating dates are great for generating reports and dashboards that are dynamic in nature. Documentation Links for Calculating Dates
+
+- [SQLite](https://www.sqlite.org/lang_datefunc.html)
+- [MS SQL](https://msdn.microsoft.com/en-us/library/ms186724.aspx#ModifyDateandTimeValues)
+- [PostgreSQL](http://www.postgresql.org/docs/9.1/static/functions-datetime.html)
+- [MySQL](https://dev.mysql.com/doc/refman/5.5/en/date-and-time-functions.html)
+- [Oracle](http://www.oracle.com/technetwork/issue-archive/2012/12-jan/o12plsql-1408561.html)
+
+SQLite:
+
+```sql
+DATE("2016-02-01");
+DATE("2016-02-01", "-7 days");
+DATE("2016-02-01", "+ 2 months");
+DATE("2016-02-01", "-2 months", "-7 days "); -- chaining modifiers
+```
+
+Show orders between 2 dates:
+
+```sql
+SELECT COUNT(*) FROM orders WHERE ordered_on
+							BETWEEN DATE("now", "-7 days") 
+								AND DATE("now", "-1 day");
+							-- today is still happening so we do it till yesterday
+```
+
+**Example**  
+
+In an ecommerce database there's an `orders` table with the columns `id`, `product_id`, `user_id`, `address_id`, `ordered_on`, `status` and `cost`.
+
+Count the total number of orders that have the `status` of `shipped` and were ordered yesterday. Alias it to `shipped_yesterday`.
+
+```sql
+SELECT COUNT(*) AS shipped_yesterday FROM orders 
+										WHERE status = "shipped" 
+										  AND ordered_on = DATE("now", "-1 day");
+```
+
+### Formatting Dates For Reporting
+
+The dates stored in a database often don't suit a human reader. In this video we'll update the dates to be more friendly!
+
+#### Documentation Links for Formatting Dates
+
+- [SQLite](https://www.sqlite.org/lang_datefunc.html)
+- [MS SQL](https://msdn.microsoft.com/en-us/library/ms186724.aspx#SetorGetSessionFormatFunctions)
+- [PostgreSQL](http://www.postgresql.org/docs/9.1/static/functions-datetime.html)
+- [MySQL](https://dev.mysql.com/doc/refman/5.5/en/date-and-time-functions.html)
+- [Oracle](https://docs.oracle.com/cd/B28359_01/server.111/b28286/sql_elements004.htm)
+
