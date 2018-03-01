@@ -440,3 +440,17 @@ The dates stored in a database often don't suit a human reader. In this video we
 - [MySQL](https://dev.mysql.com/doc/refman/5.5/en/date-and-time-functions.html)
 - [Oracle](https://docs.oracle.com/cd/B28359_01/server.111/b28286/sql_elements004.htm)
 
+**STRFTIME()**  
+
+```sql
+STRFTIME(format-string, timestring, (modifier, modifier, ...));
+STRFTIME("%d/%m/%Y", "2015-04-01 23:12:01", "+1 day");
+
+SELECT *, STRFTIME("%d/%m/%Y", ordered_on) AS UK_date FROM orders;
+SELECT title, STRFTIME("%m/%Y", date_released) AS month_year_released FROM movies; 
+```
+```sql
+TIME("2015-04-01 23:12:01") -- get only time
+DATE("2015-04-01 23:12:01") -- get only date
+```
+
