@@ -272,3 +272,65 @@ SELECT SUM(cost) AS total_spent, user_id FROM orders
 ```
 
 The `HAVING` keyword works just like like `WHERE`, but WHERE cannot be used before GROUP BY because 
+
+### Calculating Averages
+
+Averages are great for calculating averages of scores, reviews and sales.
+
+To get the average value of a numeric column use the `AVG()` function.
+
+```sql
+SELECT AVG(<numeric column>) FROM <table>;
+SELECT AVG(<numeric column>) FROM <table> GROUP BY <other column>;
+```
+```sql
+SELECT AVG(cost) FROM orders;
+-- one big number for the average of all orders
+
+SELECT AVG(cost), user_id FROM orders GROUP BY user_id;
+-- a bunch of numbers for each user, showing the user id as well
+
+SELECT AVG(rating) AS average_rating FROM reviews WHERE movie_id = 6;
+-- an average rating for a movie from all reviews in db
+```
+
+### Getting Minimum and Maximum Values
+
+Finding the minimum and maximum values for particular column can help you get an insight in to what's happening in your data.
+
+To get the maximum value of a numeric column use the `MAX()` function.
+
+```sql
+SELECT MAX(<numeric column>) FROM <table>;
+SELECT MAX(<numeric column>) FROM <table> GROUP BY <other column>;
+```
+
+To get the minimum value of a numeric column use the `MIN()` function.
+
+```sql
+SELECT MIN(<numeric column>) FROM <table>;
+SELECT MIN(<numeric column>) FROM <table> GROUP BY <other column>;
+```
+### Performing Math on Numeric Types
+
+Operators aren't only for comparing values or concatenating strings. They can be used to perform mathematical operations.
+
+**Mathematical Operators**  
+
+- `*` Multiply
+- `/` Divide
+- `+` Add
+- `-` Subtract
+
+```sql
+SELECT <numeric column> <mathematical operator> <numeric value> FROM <table>;
+```
+
+#### rounding numbers
+
+```sql
+SELECT name, price * 1.06 AS "With tax" FROM products;
+SELECT name, ROUND(price * 1.06) AS "With tax" FROM products;
+SELECT name, ROUND(price * 1.06, 2) AS "With tax" FROM products; -- rounded to 2 decimal places
+```
+
