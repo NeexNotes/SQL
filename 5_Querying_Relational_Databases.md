@@ -288,14 +288,247 @@ Here are a few:
 
 We will be transitioning from mostly theoretical concepts to hands-on application of the concepts we’ve covered in the previous three stages. We will see how to use table relationships to produce query results that combine data from multiple tables.
 
+### Inner join
+
+Inner Joins are the most common type of Joins. Inner joins match records together where values are equal on both sides of the join statement.
+
+INNER JOINs are the backbone of advanced SQL querying. There are literally thousands of books, articles and blog posts with examples and information about SQL joins.
+
+Here are some of the links to help you explore INNER JOINs further:
+
+* [W3Schools Inner Joins](http://www.w3schools.com/sql/sql_join_inner.asp)
+* [Wikipedia: Inner Joins](https://en.wikipedia.org/wiki/Join_(SQL)#Inner_join)
+
+In the video, we only showed two tables being joined together, but in reality, you can join in any number of tables.
+
+If all tables are inner-joined together, the resulting data set will contain only rows that match on the specified relationships throughout all tables. The resulting Venn Diagram could get quite complex, and depends on many factors, including number of tables, and relationships used, but could look something like this:
+
+![join](join)
+
+```sql
+--version 1: select all where MakeID is the same
+SELECT * FROM make 
+	INNER JOIN model ON make.MakeID = model.MakeID;
+
+--version 2: only show the MakeName and ModelName:
+SELECT MakeName, ModelName FROM make 
+	INNER JOIN model ON make.MakeID = model.MakeID;
+
+--version 3: you can ALIAS TABLES just like you can alias columns, and add it to whihc column is from which table making it more explicit
+SELECT mk.MakeName, md.ModelName FROM make AS mk
+	INNER JOIN model AS md ON mk.MakeID = md.MakeID;
+
+--version 4: add WHERE to the query:
+SELECT mk.MakeName, md.ModelName FROM make AS mk
+	INNER JOIN model AS md ON mk.MakeID = md.MakeID
+	WHERE mk.MakeName = "Chevy";
+```
+
+### Outer join
+
+Outer Joins are less common than Inner Joins, but still highly useful.
+
+**Three Types of Outer Joins:**
+
+* Left
+* Right
+* Full
+
+In this video, we introduced **three** types of Outer Joins, but only showed examples of the **Left Outer Join**. *This is because a few database engines, like SQLite, only support the Left Outer Join*. Most other database systems support all three types.
+
+**Right Outer Joins** are essentially the same thing as Left Outer Joins, but just specified in the opposite direction.
+
+**Full Outer Joins** are functionally different in that you are guaranteed to get all rows from both tables. Full Outer Joins aren’t used as much in application or report coding as Inner and Left/Right Outer Joins, but can come in very handy when doing things like comparing data between two tables that are structurally similar.
+
+Resources:
+[W3Schools: Left Joins](http://www.w3schools.com/sql/sql_join_left.asp)
+[W3Schools: Right Joins](http://www.w3schools.com/sql/sql_join_right.asp)
+[W3Schools: Full Joins](http://www.w3schools.com/sql/sql_join_full.asp)
+[Wikipedia: Outer Joins](https://en.wikipedia.org/wiki/Join_(SQL)#Outer_join)
+
+**Left outer join:**  
+
+```sql
+--version 1: select all where MakeID is the same even if no model exists yet
+SELECT mk.MakeName, md.ModelName FROM make AS mk
+	LEFT OUTER JOIN model AS md ON mk.MakeID = md.MakeID;
+```
+
+it will get this:
+
+| MakeName | ModelName |
+| -------- | --------- |
+| Dodge    | Dart      |
+| Honda    | Accord    |
+| Honda    | CRV       |
+| Kia      | Rio       |
+| Kia      | Soul      |
+| Toyota   | Camry     |
+| Toyota   | Sienna    |
+| BMW      |           |
+
+ And not this:
+
+```sql
+SELECT mk.MakeName, md.ModelName FROM make AS mk
+	INNER JOIN model AS md ON mk.MakeID = md.MakeID;
+```
+
+| Dodge  | Challenger |
+| ------ | ---------- |
+| Dodge  | Dart       |
+| Honda  | Accord     |
+| Honda  | CRV        |
+| Kia    | Soul       |
+| Kia    | Rio        |
+| Toyota | Camry      |
+| Toyota | Sienna     |
+| Honda  | Element    |
+
+**Count models:**  
+
+```sql
+SELECT mk.MakeName, COUNT(md.ModelName) AS NumberOfModels FROM make AS mk
+	LEFT OUTER JOIN model AS md ON mk.MakeID = md.MakeID
+	GROUP BY mk.MakeName;
+```
+
+| MakeName | NumberOfModels |
+| -------- | -------------- |
+| BMW      | 0              |
+| Chevy    | 3              |
+| Dodge    | 2              |
+| Ford     | 3              |
+| Honda    | 3              |
+| Jeep     | 2              |
+| Kia      | 2              |
+| Toyota   | 2              |
+
+**GENERAL DEFINITION**  
+
+```sql
+SELECT <columns>
+	FROM <table1>
+	LEFT OUTER JOIN <table2> ON <equality criteria>
+	-- INNER JOIN <table3 ON <equality criteria> -- can be combined with other JOINs
+	WHERE <Search criteria>...etc
+```
+
+### Cross join
+
+You might be thinking, “What on earth is a Cross Join?” We didn’t cover Cross Joins because they are not very common, but they do serve a purpose. And being able to recognize a Cross Join can actually help you if you’re troubleshooting sometimes.
+
+A **Cross Join** takes each row from the first table and matches it with every row in the second table. This can be useful if you ever need to select all possible combinations of rows from two tables. For instance, if I had two tables with 10 rows each and I cross joined them, I would get a 100 row result set back.
+
+Where this knowledge really comes in handy is if you ever see data that is being duplicated many times over unexpectedly in a query result, you may have done something wrong in your Inner Join that caused the matching criteria to be ignored. It’s a sign to go back and double check that you have the proper equality statement in the **ON** portion of the Inner Join section.
+
+**Resources:**  
+
+[Wikipedia: Cross Joins](https://en.wikipedia.org/wiki/Join_(SQL)#Cross_join)
+[W3Schools: Cross Joins](http://www.w3resource.com/sql/joins/cross-join.php)
+
+**Exercise**:
+
+1) In a car database there is 
+a `Make` table with columns, `MakeID` and `MakeName`, 
+a `Model` table with columns, `ModelID`, `MakeID` and `ModelName` and 
+a `Car` table with columns, `CarID`, `ModelID`, `VIN`, `ModelYear` and `StickerPrice`.
+
+For all cars in the database, show Make Name, Model Name, VIN and Sticker Price from the Model and Car tables in one result set.  
+
+```sql
+SELECT MakeName, ModelName, VIN, StickerPrice FROM Model
+	INNER JOIN Car ON Car.ModelID = Model.ModelID
+    INNER JOIN Make ON Make.MakeID = Model.MakeID;
+```
+
+2) In a car database there is 
+
+*  `Sale` table with columns, `SaleID`, `CarID`, `CustomerID`, `LocationID`, `SalesRepID`, `SaleAmount` and `SaleDate`. 
+* `SalesRep` table with columns, `SalesRepID`, `FirstName`, `LastName`, `SSN`, `PhoneNumber`, `StreetAddress`, `City`, `State` and `ZipCode`.
+
+Show the First and Last Name of each sales rep along with SaleAmount from both the SalesRep and Sale tables in one result set.
+
+```sql
+SELECT FirstName, LastName, SaleAmount FROM Sale
+	INNER JOIN SalesRep ON SalesRep.SalesRepID = Sale.SalesRepID
+```
+
+3) In a car database there is:
+
+* `Model` table with columns, `ModelID`, `MakeID` and `ModelName` 
+* `Car` table with columns, `CarID`, `ModelID`, `VIN`, `ModelYear` and `StickerPrice`
+
+Show all Model names from the Model table along with VIN from the Car table. Make sure models that aren't in the Car table still show in the results!
+
+```sql
+SELECT ModelName, VIN FROM Model
+	LEFT OUTER JOIN Car ON Car.ModelID = Model.ModelID;
+```
+
+4) In a car database there is 
+
+* `Sale` table with columns, `SaleID`, `CarID`, `CustomerID`, `LocationID`, `SalesRepID`, `SaleAmount` and `SaleDate`. 
+* `SalesRep` table with columns, `SalesRepID`, `FirstName`, `LastName`, `SSN`, `PhoneNumber`, `StreetAddress`, `City`, `State` and `ZipCode`.
+
+Show all SaleDate, SaleAmount, and SalesRep First and Last name from Sale and SalesRep. Make sure that all Sales appear in results even if there is no SalesRep associated to the sale. 
+
 
 
 ## Set Operations
 
 We cover more SQL operations that allow us to combine data sets from multiple tables in various ways.
 
+Introducing the SQL commands that allow us to perform relatively complex set operations on a database
 
+As with the other topics we’ve covered in this series, there is a wealth of information available on the topic of sets, databases, and SQL.
+
+We'll get into the following topics in this stage, but here are a few links that talk a little more about Set Operations in SQL:
+
+- [What is the difference between a JOIN and a UNION?](https://www.essentialsql.com/what-is-the-difference-between-a-join-and-a-union/)
+- [Learn to use UNION, INTERSECT, and EXCEPT Clauses](https://www.essentialsql.com/learn-to-use-union-intersect-and-except-clauses/)
+
+**Other good reads about Set Operations include:**
+
+Union and Union All:
+
+[SQL UNION Operator](http://www.w3schools.com/sql/sql_union.asp)
+[SQL - UNIONS Clause](http://www.tutorialspoint.com/sql/sql-unions-clause.htm)
+
+Intersect:
+
+[SQL - INTERSECT Clause](http://www.tutorialspoint.com/sql/sql-intersect-clause.htm)
+[SQL Server: INTERSECT Operator](http://www.techonthenet.com/sql/intersect.php)
+
+Except:
+
+[SQL - EXCEPT Clause](http://www.tutorialspoint.com/sql/sql-except-clause.htm)
+[SQL Server: EXCEPT](http://www.techonthenet.com/sql_server/except.php)
+
+**Union Operations**  
+
+One of the more common set operations in SQL is the UNION statement. Use to combine two data sets into one, stacked one on top of the other, unlike an inner join which puts data together side by side.
+
+As with the other topics we’ve covered in this series, there is a wealth of information available on the topic of sets, databases, and SQL.
+
+Check out this great read on Set Theory and SQL: [“SQL-99 Complete, Really”, by Peter Guzman & Trudy Pelzer](https://mariadb.com/kb/en/sql-99/set-theory/) hosted on MariaDB.
+
+The link above contains more than just UNION, INTERSECT and EXCEPT, but there is a section towards the end that applies those operations to the larger discussion. This is a wonderful article!
 
 ## Subqueries
 
-We introduce the you to Subqueries. Subqueries are a powerful tool that allow us to work with data in smaller subsets, which can greatly increase query performance and efficiency.
+We introduce the you to Subqueries. Subqueries are a powerful tool that allow us to work with data in smaller subsets, which can greatly increase query performance and efficiency. 
+
+Here we discuss the concepts behind subqueries, and learn how and when we might use them.
+
+Subqueries are one of the most advanced concepts to learn in SQL query writing. Seeing lots of examples and getting lots of practice will help solidify the concept.
+
+[Advanced Subqueries](https://sqlschool.modeanalytics.com/advanced/subqueries/)
+
+**As you begin using subqueries, be advised that a poorly structured subquery written against a large table or tables can impact overall query performance**. Be careful if you are writing subqueries against data sets that consume tables with row counts in the million-plus row range.
+
+**Correlated Subqueries**  
+
+This course does not cover the concept called **Correlated Subqueries**, which are slightly different in how they tie in with the outer query. Most of the time a regular subquery will do what you need, but correlated subqueries can be handy, too. These are especially heavy weight on the database engine, as they run the subquery many times; once per row in the outer query.
+
+[Information on all subquery types including correlated subqueries](http://w3processing.com/index.php?subMenuId=119)
